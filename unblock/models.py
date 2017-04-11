@@ -36,3 +36,9 @@ class Puzzle(models.Model):
         self.difficulty_points += num_brains
         self.difficulty_ratings += 1
         self.save()
+
+    def rating(self):
+        return self.stars / self.ratings
+
+    def difficulty_rating(self):
+        return self.difficulty_points / self.difficulty_ratings

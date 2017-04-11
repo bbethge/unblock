@@ -1,5 +1,9 @@
-from django.http import HttpResponse
+from django.shortcuts import render
+
+from .models import Puzzle
 
 
 def index(request):
-    return HttpResponse("Congratulations, you’re at the Unblock index.")
+    latest_puzzle_list = Puzzle.objects.order_by('-pub_date')[:10]
+    context = { 'latest_puzzle_list': latest_puzzle_list }
+    return render(request, 'unblock/index.html', context)

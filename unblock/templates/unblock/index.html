@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Latest Puzzles</title>
+    </head>
+    <body>
+    {% if latest_puzzle_list %}
+        <ul>
+        {% for puzzle in latest_puzzle_list %}
+            <li><a href="#">
+                {{ puzzle.name }}
+            </a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No puzzles are available.</p>
+    {% endif %}
+    </body>
+</html>

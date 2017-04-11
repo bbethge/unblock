@@ -20,7 +20,11 @@ class Puzzle(models.Model):
     ratings = models.IntegerField(default=0)
     difficulty_points = models.IntegerField(default=0)
     difficulty_ratings = models.IntegerField(default=0)
-    # TODO: actually store the tile pattern
+    # Stored in row-major order from bottom; 0=empty; 1..max_colors=tile color
+    tiles = models.BinaryField(
+        max_length=num_rows*num_columns,
+        default=b'\0'*(num_rows*num_columns)
+    )
     # TODO: figure out how to make the model depend on app configuration
 
     def rate(self, num_stars):

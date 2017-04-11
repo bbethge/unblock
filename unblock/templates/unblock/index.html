@@ -5,13 +5,25 @@
     </head>
     <body>
     {% if latest_puzzle_list %}
-        <ul>
+        <table>
         {% for puzzle in latest_puzzle_list %}
-            <li><a href="{% url 'unblock:puzzle' puzzle.id %}">
-                {{ puzzle.name }}
-            </a></li>
+            <tr>
+                <td><a href="{% url 'unblock:puzzle' puzzle.id %}">
+                    {{ puzzle.name }}
+                </a></td>
+                <td>
+                    {% if puzzle.creator %}
+                    {{ puzzle.creator.username }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if puzzle.rating %}
+                    {{ puzzle.rating }}★
+                    {% endif %}
+                </td>
+            </tr>
         {% endfor %}
-        </ul>
+        </table>
     {% else %}
         <p>No puzzles are available.</p>
     {% endif %}

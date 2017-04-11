@@ -5,6 +5,9 @@
     </head>
     <body>
         <h1>{{ puzzle.name }}</h1>
+        {% if puzzle.creator %}
+        <p>Created by {{ puzzle.creator.username }}</p>
+        {% endif %}
         <p>{{ puzzle.moves }} move{{ puzzle.moves|pluralize }}</p>
         <table>
         {% for row in tiles %}

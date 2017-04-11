@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ puzzle.name }}</title>
+    </head>
+    <body>
+        <h1>{{ puzzle.name }}</h1>
+        <p>{{ puzzle.moves }} move{{ puzzle.moves|pluralize }}</p>
+        <table>
+        {% for row in tiles %}
+            <tr>
+            {% for tile in row %}
+                <td>{{ tile }}</td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </table>
+    </body>
+</html>

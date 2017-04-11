@@ -46,7 +46,13 @@ class Puzzle(models.Model):
         self.save()
 
     def rating(self):
-        return self.stars / self.ratings
+        if self.ratings > 0:
+            return self.stars / self.ratings
+        else:
+            return null
 
     def difficulty_rating(self):
-        return self.difficulty_points / self.difficulty_ratings
+        if self.difficulty_ratings > 0:
+            return self.difficulty_points / self.difficulty_ratings
+        else:
+            return null

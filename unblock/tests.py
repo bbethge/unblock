@@ -1,6 +1,8 @@
 from django.test import TestCase
+from django.urls import reverse
 
 from .models import InvalidRatingError, Puzzle, max_stars, max_brains
+from .models import num_rows, num_columns
 
 
 class PuzzleMethodTests(TestCase):
@@ -45,3 +47,42 @@ class PuzzleMethodTests(TestCase):
             puzzle.rate_difficulty(0)
         with self.assertRaises(InvalidRatingError):
             puzzle.rate_difficulty(-2)
+
+
+def create_simple_puzzle(name):
+    return Puzzle.objects.create(
+        name=name,
+        tiles=b'\0\1\1\0\1\0'+b'\0'*(num_columns*(num_rows-1))
+    )
+
+class PuzzleViewTests(TestCase):
+
+    def test_index_view_with_no_puzzles(self):
+        """
+        If no puzzles exist, an appropriate message should be displayed.
+        """
+        response = self.client.get(reverse('unblock:index'))
+        self.assertContains(response, "No puzzles are available.")
+        self.assertQuerysetEqual(response.context['latest_puzzle_list'], [])
+
+    def test_index_view_with_one_puzzle(self):
+        """
+        If one puzzle exists, it should be listed by name.
+        """
+        puzzle = create_simple_puzzle("Simple Puzzle")
+        response = self.client.get(reverse('unblock:index'))
+        self.assertContains(response, "Simple Puzzle")
+        self.assertQuerysetEqual(
+            response.context['latest_puzzle_list'],
+            ['<Puzzle: Simple Puzzle>']
+        )
+
+    def test_puzzle_view(self):
+        """
+        A puzzle view should show the puzzle’s name.
+        """
+        puzzle = create_simple_puzzle("A Simple Puzzle")
+        response = self.client.get(
+            reverse('unblock:puzzle', args=(puzzle.id,))
+        )
+        self.assertContains(response, "A Simple Puzzle")

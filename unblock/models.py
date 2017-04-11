@@ -1,5 +1,7 @@
 from django.db import models
 
+from django.contrib.auth.models import User
+
 
 num_rows = 12
 num_columns = 6
@@ -15,7 +17,7 @@ class InvalidRatingError(Exception):
 class Puzzle(models.Model):
     name = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
-    # TODO: user that created it
+    creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     stars = models.IntegerField(default=0)
     ratings = models.IntegerField(default=0)
     difficulty_points = models.IntegerField(default=0)

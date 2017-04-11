@@ -14,7 +14,7 @@ class InvalidRatingError(Exception):
 
 class Puzzle(models.Model):
     name = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date published')
+    pub_date = models.DateTimeField('date published', auto_now_add=True)
     # TODO: user that created it
     stars = models.IntegerField(default=0)
     ratings = models.IntegerField(default=0)

@@ -25,7 +25,11 @@ class Puzzle(models.Model):
         max_length=num_rows*num_columns,
         default=b'\0'*(num_rows*num_columns)
     )
+    moves = models.SmallIntegerField(default=1)
     # TODO: figure out how to make the model depend on app configuration
+
+    def __str__(self):
+        return self.name
 
     def rate(self, num_stars):
         if num_stars < 1 or num_stars > max_stars:

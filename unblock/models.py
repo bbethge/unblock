@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 num_rows = 12
 num_columns = 6
-num_colors = 6  # Maximum 255
+num_colors = 6  # Maximum 255; must have enough colors defined in play.js
 max_stars = 5
 max_brains = 5
 

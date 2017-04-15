@@ -1,7 +1,17 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% load static %}
         <title>{{ puzzle.name }}</title>
+        <script type="text/javascript">
+            // Take advantage of common syntax between JavaScript and Python
+            tiles = {{ tiles }};
+        </script>
+        <script
+          type="text/javascript"
+          defer
+          src="{% static 'unblock/play.js' %}">
+        </script>
     </head>
     <body>
         <h1>{{ puzzle.name }}</h1>
@@ -9,14 +19,17 @@
         <p>Created by {{ puzzle.creator.username }}</p>
         {% endif %}
         <p>{{ puzzle.moves }} move{{ puzzle.moves|pluralize }}</p>
-        <table>
-        {% for row in tiles %}
-            <tr>
-            {% for tile in row %}
-                <td>{{ tile }}</td>
+        <canvas id="canvas" width=300 height=600></canvas>
+        <noscript>
+            <table>
+            {% for row in tiles %}
+                <tr>
+                {% for tile in row %}
+                    <td>{{ tile }}</td>
+                {% endfor %}
+                </tr>
             {% endfor %}
-            </tr>
-        {% endfor %}
-        </table>
+            </table>
+        </noscript>
     </body>
 </html>

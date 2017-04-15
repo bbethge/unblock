@@ -22,10 +22,16 @@ function drawCanvas() {
                     c * tile_width, r * tile_height, tile_width, tile_height
                 );
             }
+            else if (tiles[r][c] < 0) {
+                context.fillStyle = 'black';
+                context.fillRect(
+                    c * tile_width, r * tile_height, tile_width, tile_height
+                );
+            }
         }
     }
     context.lineWidth = 2 * Math.round(tile_width / 25);
-    context.strokeStyle = '#ffffff';
+    context.strokeStyle = 'white';
     context.strokeRect(
         (cursor_column-1) * tile_width, cursor_row * tile_height,
         tile_width, tile_height
@@ -34,6 +40,35 @@ function drawCanvas() {
         cursor_column * tile_width, cursor_row * tile_height,
         tile_width, tile_height
     );
+}
+
+function markDyingTiles() {
+    for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < columns - 2; c++) {
+            if (
+                tiles[r][c] != 0
+                && Math.abs(tiles[r][c]) == Math.abs(tiles[r][c+1])
+                && Math.abs(tiles[r][c]) == Math.abs(tiles[r][c+2])
+            ) {
+                tiles[r][c] = -Math.abs(tiles[r][c]);
+                tiles[r][c+1] = -Math.abs(tiles[r][c]);
+                tiles[r][c+2] = -Math.abs(tiles[r][c]);
+            }
+        }
+    }
+    for (var c = 0; c < columns; c++) {
+        for (var r = 0; r < rows - 2; r++) {
+            if (
+                tiles[r][c] != 0
+                && Math.abs(tiles[r][c]) == Math.abs(tiles[r+1][c])
+                && Math.abs(tiles[r][c]) == Math.abs(tiles[r+2][c])
+            ) {
+                tiles[r][c] = -Math.abs(tiles[r][c]);
+                tiles[r+1][c] = -Math.abs(tiles[r][c]);
+                tiles[r+2][c] = -Math.abs(tiles[r][c]);
+            }
+        }
+    }
 }
 
 canvas.onmousemove = function (event) {
@@ -52,6 +87,7 @@ canvas.onclick = function (event) {
         var swap = tiles[cursor_row][cursor_column];
         tiles[cursor_row][cursor_column] = tiles[cursor_row][cursor_column-1]
         tiles[cursor_row][cursor_column-1] = swap;
+        markDyingTiles();
         drawCanvas();
     }
 }

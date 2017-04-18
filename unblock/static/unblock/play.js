@@ -6,24 +6,42 @@ var tileWidth = canvas.width / columns;
 var tileHeight = canvas.height / rows;
 var cursorRow = Math.round(rows / 2);
 var cursorColumn = Math.round(columns / 2);
+var deadTileLifetime = 300;
 
 
 var colors =
     [ '#20a020', '#108080', '#303090', '#903090', '#802020', '#a0a030'];
+
+function Tile(color) {
+    return {
+        'color': color,
+        'dead': false,
+    };
+}
+
+var tileObjects = [];
+for (var r = 0; r < rows; r++) {
+    tileObjects[r] = [];
+    for (var c = 0; c < columns; c++) {
+        if (tiles[r][c] == 0) {
+            tileObjects[r][c] = null;
+        } else {
+            tileObjects[r][c] = Tile(tiles[r][c]-1);
+        }
+    }
+}
 
 function drawCanvas() {
     context.fillStyle = '#bbbbbb';
     context.fillRect(0, 0, canvas.width, canvas.height);
     for (var r = 0; r < rows; r++) {
         for (var c = 0; c < columns; c++) {
-            if (tiles[r][c] > 0) {
-                context.fillStyle = colors[tiles[r][c]-1];
-                context.fillRect(
-                    c * tileWidth, r * tileHeight, tileWidth, tileHeight
-                );
-            }
-            else if (tiles[r][c] < 0) {
-                context.fillStyle = 'black';
+            if (tileObjects[r][c] !== null) {
+                if (tileObjects[r][c].dead) {
+                    context.fillStyle = 'black';
+                } else {
+                    context.fillStyle = colors[tileObjects[r][c].color];
+                }
                 context.fillRect(
                     c * tileWidth, r * tileHeight, tileWidth, tileHeight
                 );
@@ -46,28 +64,48 @@ function markDyingTiles() {
     for (var r = 0; r < rows; r++) {
         for (var c = 0; c < columns - 2; c++) {
             if (
-                tiles[r][c] != 0
-                && Math.abs(tiles[r][c]) == Math.abs(tiles[r][c+1])
-                && Math.abs(tiles[r][c]) == Math.abs(tiles[r][c+2])
+                tileObjects[r][c] !== null
+                && tileObjects[r][c+1] !== null
+                && tileObjects[r][c+1].color == tileObjects[r][c].color
+                && tileObjects[r][c+2] !== null
+                && tileObjects[r][c+2].color == tileObjects[r][c].color
             ) {
-                tiles[r][c] = -Math.abs(tiles[r][c]);
-                tiles[r][c+1] = -Math.abs(tiles[r][c]);
-                tiles[r][c+2] = -Math.abs(tiles[r][c]);
+                tileObjects[r][c].dying = true;
+                tileObjects[r][c+1].dying = true;
+                tileObjects[r][c+2].dying = true;
             }
         }
     }
-    for (var c = 0; c < columns; c++) {
-        for (var r = 0; r < rows - 2; r++) {
+    for (var r = 0; r < rows - 2; r++) {
+        for (var c = 0; c < columns; c++) {
             if (
-                tiles[r][c] != 0
-                && Math.abs(tiles[r][c]) == Math.abs(tiles[r+1][c])
-                && Math.abs(tiles[r][c]) == Math.abs(tiles[r+2][c])
+                tileObjects[r][c] !== null
+                && tileObjects[r+1][c] !== null
+                && tileObjects[r+1][c].color == tileObjects[r][c].color
+                && tileObjects[r+2][c] !== null
+                && tileObjects[r+2][c].color == tileObjects[r][c].color
             ) {
-                tiles[r][c] = -Math.abs(tiles[r][c]);
-                tiles[r+1][c] = -Math.abs(tiles[r][c]);
-                tiles[r+2][c] = -Math.abs(tiles[r][c]);
+                tileObjects[r][c].dying = true;
+                tileObjects[r+1][c].dying = true;
+                tileObjects[r+1][c].dying = true;
             }
         }
+    }
+    var deadTiles = false;
+    for (var r = 0; r < rows; r++) {
+        for (var c = 0; c < columns; c++) {
+            if (tileObjects[r][c] !== null && tileObjects[r][c].dying) {
+                tileObjects[r][c].dead = true;
+                deadTiles = true;
+                setTimeout((function (r, c) {
+                    tileObjects[r][c] = null;
+                }), deadTileLifetime, r, c);
+                delete tileObjects[r][c].dying;
+            }
+        }
+    }
+    if (deadTiles) {
+        setTimeout(drawCanvas, deadTileLifetime);
     }
 }
 
@@ -83,10 +121,21 @@ canvas.onmousemove = function (event) {
 }
 
 canvas.onclick = function (event) {
-    if (event.button == 0) {
-        var swap = tiles[cursorRow][cursorColumn];
-        tiles[cursorRow][cursorColumn] = tiles[cursorRow][cursorColumn-1]
-        tiles[cursorRow][cursorColumn-1] = swap;
+    if (
+        event.button == 0
+        && (
+            tileObjects[cursorRow][cursorColumn-1] === null
+            || !tileObjects[cursorRow][cursorColumn-1].dead
+        )
+        && (
+            tileObjects[cursorRow][cursorColumn] === null
+            || !tileObjects[cursorRow][cursorColumn].dead
+        )
+    ) {
+        var swap = tileObjects[cursorRow][cursorColumn];
+        tileObjects[cursorRow][cursorColumn] =
+            tileObjects[cursorRow][cursorColumn-1];
+        tileObjects[cursorRow][cursorColumn-1] = swap;
         markDyingTiles();
         drawCanvas();
     }

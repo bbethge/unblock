@@ -1,6 +1,6 @@
 from django.shortcuts import get_object_or_404, render
 
-from .models import Puzzle, num_rows, num_columns
+from .models import Puzzle, num_rows, num_columns, num_colors
 
 
 def index(request):
@@ -21,3 +21,10 @@ def puzzle(request, puzzle_id):
         ],
     }
     return render(request, 'unblock/puzzle.html', context)
+
+def create(request):
+    context = {
+        'tiles': [[0]*num_columns for i in range(num_rows)], 
+        'num_colors': num_colors,
+    }
+    return render(request, 'unblock/create.html', context);

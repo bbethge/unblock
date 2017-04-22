@@ -7,6 +7,7 @@ var tileHeight = canvas.height / rows;
 var cursorRow = Math.round(rows / 2);
 var cursorColumn = Math.round(columns / 2);
 var deadTileLifetime = 300;
+var fallingTileTimeout = 100;
 
 
 var colors =
@@ -87,7 +88,7 @@ function markDyingTiles() {
             ) {
                 tileObjects[r][c].dying = true;
                 tileObjects[r+1][c].dying = true;
-                tileObjects[r+1][c].dying = true;
+                tileObjects[r+2][c].dying = true;
             }
         }
     }
@@ -105,7 +106,45 @@ function markDyingTiles() {
         }
     }
     if (deadTiles) {
-        setTimeout(drawCanvas, deadTileLifetime);
+        setTimeout((function() {
+            moveFallingTiles();
+            drawCanvas();
+        }), deadTileLifetime);
+    }
+}
+
+function moveFallingTiles() {
+    var fallingTiles = false;
+    for (var r = rows - 2; r >= 0; r--) {
+        for (var c = 0; c < columns; c++) {
+            if (
+                tileObjects[r][c] !== null && !tileObjects[r][c].dead
+                && (
+                    tileObjects[r+1][c] === null
+                    || tileObjects[r+1][c].falling
+                )
+            ) {
+                fallingTiles = true;
+                // FIXME: what if the player changes tileObjects[r][c]
+                // before the timeout?
+                tileObjects[r][c].falling = true;
+                setTimeout((function (r, c) {
+                    if (tileObjects[r+1][c] === null) {
+                        tileObjects[r+1][c] = tileObjects[r][c];
+                        delete tileObjects[r+1][c].falling;
+                        tileObjects[r][c] = null;
+                    }
+                }), fallingTileTimeout, r, c);
+            }
+        }
+    }
+    if (fallingTiles) {
+        setTimeout((function () {
+            moveFallingTiles();
+            drawCanvas();
+        }), fallingTileTimeout);
+    } else {
+        markDyingTiles();
     }
 }
 
@@ -136,6 +175,7 @@ canvas.onclick = function (event) {
         tileObjects[cursorRow][cursorColumn] =
             tileObjects[cursorRow][cursorColumn-1];
         tileObjects[cursorRow][cursorColumn-1] = swap;
+        moveFallingTiles();
         markDyingTiles();
         drawCanvas();
     }

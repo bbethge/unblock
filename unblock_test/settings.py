@@ -55,7 +55,7 @@ ROOT_URLCONF = 'unblock_test.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['unblock_test/templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

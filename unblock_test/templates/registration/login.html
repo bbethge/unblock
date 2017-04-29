@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Log In – {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Log In</h1>
+<form method="post" action="{% url 'login'%}">
+{% csrf_token %}
+{# Apparently the form also contains table elements #}
+    <table>
+    {{ form }}
+    </table>
+    <input type="submit" value="Log In">
+    <input type="hidden" name="next" value="{% url 'unblock:index' %}">
+</form>
+{% endblock content %}

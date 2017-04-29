@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}Unblock Test{% endblock %}</title>
+    {% block head %}{% endblock %}
+    </head>
+    <body>
+        <header>
+        {% comment %}
+            Apparently we always have the “user” variable even if the view 
+            doesn’t provide it
+        {% endcomment %}
+        {% if user.is_authenticated %}
+            <a href="{% url 'logout' %}">Log out</a> {{ user.username }}
+        {% else %}
+            <a href="{% url 'login' %}">Log in</a>
+        {% endif %}
+        </header>
+    {% block content %}{% endblock %}
+    </body>
+</html>

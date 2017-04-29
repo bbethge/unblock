@@ -1,35 +1,33 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Create New Puzzle</title>
-    </head>
-    <body>
-        <h1>Create New Puzzle</h1>
-        <form action="#" method="post">
-        {% csrf_token %}
-            <h2>
+{% extends 'base.html' %}
+
+{% block title %}Create New Puzzle – {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Create New Puzzle</h1>
+<form action="#" method="post">
+{% csrf_token %}
+    <h2>
+        <input
+          type="text" name="name" placeholder="Puzzle Name"
+          size="30" required>
+    </h2>
+    <label>
+        Number of moves:
+        <input type="number" name="moves" min="1" value="1" required>
+    </label>
+    <table>
+    {% for row in tiles %}
+        <tr>
+        {% for tile in row %}
+            <td>
                 <input
-                  type="text" name="name" placeholder="Puzzle Name"
-                  size="30" required>
-            </h2>
-            <label>
-                Number of moves:
-                <input type="number" name="moves" min="1" value="1" required>
-            </label>
-            <table>
-            {% for row in tiles %}
-                <tr>
-                {% for tile in row %}
-                    <td>
-                        <input
-                          type="number" min="0" max="{{num_colors}}"
-                          name="tile{{ forloop.parentloop.revcounter0 }}_{{ forloop.counter0 }}">
-                    </td>
-                {% endfor %}
-                </tr>
-            {% endfor %}
-            </table>
-            <input type="submit" value="Submit">
-        </form>
-    </body>
-</html>
+                  type="number" min="0" max="{{num_colors}}"
+                  name="tile{{ forloop.parentloop.revcounter0 }}_{{ forloop.counter0 }}">
+            </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+    <input type="submit" value="Submit">
+</form>
+{% endblock content %}

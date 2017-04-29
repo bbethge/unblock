@@ -1,33 +1,31 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Latest Puzzles</title>
-    </head>
-    <body>
-    <h1>Latest Puzzles</h1>
-    {% if latest_puzzle_list %}
-        <table>
-        {% for puzzle in latest_puzzle_list %}
-            <tr>
-                <td><a href="{% url 'unblock:puzzle' puzzle.id %}">
-                    {{ puzzle.name }}
-                </a></td>
-                <td>
-                    {% if puzzle.creator %}
-                    {{ puzzle.creator.username }}
-                    {% endif %}
-                </td>
-                <td>
-                    {% if puzzle.rating %}
-                    {{ puzzle.rating }}★
-                    {% endif %}
-                </td>
-            </tr>
-        {% endfor %}
-        </table>
-    {% else %}
-        <p>No puzzles are available.</p>
-    {% endif %}
-    <a href="{% url 'unblock:create' %}">Create new…</a>
-    </body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Latest Puzzles – {{ block.super }}{% endblock %}
+
+{% block content %}
+<h1>Latest Puzzles</h1>
+{% if latest_puzzle_list %}
+    <table>
+    {% for puzzle in latest_puzzle_list %}
+        <tr>
+            <td><a href="{% url 'unblock:puzzle' puzzle.id %}">
+                {{ puzzle.name }}
+            </a></td>
+            <td>
+                {% if puzzle.creator %}
+                {{ puzzle.creator.username }}
+                {% endif %}
+            </td>
+            <td>
+                {% if puzzle.rating %}
+                {{ puzzle.rating }}★
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+    </table>
+{% else %}
+    <p>No puzzles are available.</p>
+{% endif %}
+<a href="{% url 'unblock:create' %}">Create new…</a>
+{% endblock content %}

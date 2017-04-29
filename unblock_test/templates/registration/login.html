@@ -11,6 +11,7 @@
     {{ form }}
     </table>
     <input type="submit" value="Log In">
-    <input type="hidden" name="next" value="{% url 'unblock:index' %}">
+    {# XXX: why does the “next” variable already exist? #}
+    <input type="hidden" name="next" value="{{ next }}">
 </form>
 {% endblock content %}

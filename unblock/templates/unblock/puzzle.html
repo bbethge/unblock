@@ -6,7 +6,8 @@
 {% load static %}
 <script type="text/javascript">
     {# Take advantage of common syntax between JavaScript and Python #}
-    tiles = {{ tiles }};
+    var tiles = {{ tiles }};
+    var movesRemaining = {{ puzzle.moves }};
 </script>
 <script
   type="text/javascript"
@@ -20,7 +21,7 @@
 {% if puzzle.creator %}
 <p>Created by {{ puzzle.creator.username }}</p>
 {% endif %}
-<p>{{ puzzle.moves }} move{{ puzzle.moves|pluralize }}</p>
+<p>Moves: <span id="moves_remaining">{{ puzzle.moves }}</p>
 <canvas id="canvas" width=300 height=600></canvas>
 <noscript>
     <table>

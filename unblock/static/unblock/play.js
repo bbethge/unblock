@@ -160,21 +160,29 @@ canvas.onmousemove = function (event) {
 }
 
 canvas.onclick = function (event) {
+    var leftMoveable =
+        tileObjects[cursorRow][cursorColumn-1] === null
+        || !tileObjects[cursorRow][cursorColumn-1].dead;
+    var rightMoveable =
+        tileObjects[cursorRow][cursorColumn] === null
+        || !tileObjects[cursorRow][cursorColumn].dead;
+    var bothNull =
+        tileObjects[cursorRow][cursorColumn-1] == null
+        && tileObjects[cursorRow][cursorColumn] == null;
     if (
-        event.button == 0
-        && (
-            tileObjects[cursorRow][cursorColumn-1] === null
-            || !tileObjects[cursorRow][cursorColumn-1].dead
-        )
-        && (
-            tileObjects[cursorRow][cursorColumn] === null
-            || !tileObjects[cursorRow][cursorColumn].dead
-        )
+        event.button == 0 && leftMoveable && rightMoveable && !bothNull
+        && movesRemaining > 0
     ) {
         var swap = tileObjects[cursorRow][cursorColumn];
         tileObjects[cursorRow][cursorColumn] =
             tileObjects[cursorRow][cursorColumn-1];
         tileObjects[cursorRow][cursorColumn-1] = swap;
+        movesRemaining--;
+        var movesIndicator = document.getElementById("moves_remaining");
+        movesIndicator.replaceChild(
+            document.createTextNode(movesRemaining),
+            movesIndicator.firstChild
+        );
         moveFallingTiles();
         markDyingTiles();
         drawCanvas();

@@ -4,7 +4,7 @@
 
 {% block content %}
 <h1>Create New Puzzle</h1>
-<form action="#" method="post">
+<form action="{% url 'unblock:create_done' %}" method="post">
 {% csrf_token %}
     <h2>
         <input
@@ -21,7 +21,7 @@
         {% for tile in row %}
             <td>
                 <input
-                  type="number" min="0" max="{{num_colors}}"
+                  type="number" min="0" max="{{num_colors}}" value="0"
                   name="tile{{ forloop.parentloop.revcounter0 }}_{{ forloop.counter0 }}">
             </td>
         {% endfor %}

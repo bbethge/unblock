@@ -1,5 +1,7 @@
 from django.shortcuts import get_object_or_404, render
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 from .models import Puzzle, num_rows, num_columns, num_colors
 
@@ -30,3 +32,21 @@ def create(request):
         'num_colors': num_colors,
     }
     return render(request, 'unblock/create.html', context);
+
+@login_required
+def create_done(request):
+    tiles = []
+    for r in range(num_rows):
+        for c in range(num_columns):
+            key_name = 'tile{}_{}'.format(r, c)
+            if key_name in request.POST:
+                tiles.append(int(request.POST[key_name]))
+            else:
+                tiles.append(0)
+    Puzzle.objects.create(
+        name=request.POST['name'],
+        creator=request.user,
+        moves=request.POST['moves'],
+        tiles=bytes(tiles),
+    )
+    return HttpResponseRedirect(reverse('unblock:index'))

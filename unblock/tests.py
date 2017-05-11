@@ -1,8 +1,10 @@
 from django.test import TestCase
 from django.urls import reverse
 
+from django.contrib.auth.models import User
+
 from .models import InvalidRatingError, Puzzle, max_stars, max_brains
-from .models import num_rows, num_columns
+from .models import num_rows, num_columns, num_colors
 
 
 class PuzzleMethodTests(TestCase):
@@ -86,3 +88,45 @@ class PuzzleViewTests(TestCase):
             reverse('unblock:puzzle', args=(puzzle.id,))
         )
         self.assertContains(response, "A Simple Puzzle")
+
+
+def create_blank_puzzle_post_data(name, moves):
+    result = { 'name': name, 'moves': str(moves) }
+    for r in range(num_rows):
+        for c in range(num_columns):
+            result['tile{}_{}'.format(r, c)] = '0'
+    return result
+
+class PuzzleCreationTests(TestCase):
+
+    def setUp(self):
+        User.objects.create_user('daniel', 'dan@example.com', 'danpassword')
+        self.client.login(username='daniel', password='danpassword')
+
+    def test_create_valid_puzzle(self):
+        """
+        A user should be able to create a valid puzzle.
+        """
+        data = create_blank_puzzle_post_data("My Puzzle", 2)
+        data['tile0_1'] = '1'
+        data['tile0_3'] = '1'
+        data['tile0_5'] = '1'
+        # TODO: Use secure=True
+        response = self.client.post(reverse('unblock:create_done'), data)
+        self.assertRedirects(response, reverse('unblock:index'))
+        self.assertEqual(len(Puzzle.objects.filter(name="My Puzzle")), 1)
+        self.assertEqual(
+            Puzzle.objects.filter(name="My Puzzle")[0].tiles[:num_columns],
+            b'\0\1\0\1\0\1',
+        )
+
+    def test_create_puzzle_with_invalid_color(self):
+        """
+        A user should not be able to create a puzzle with an invalid color.
+        """
+        data = create_blank_puzzle_post_data("My Puzzle", 1)
+        data['tile0_0'] = num_colors+1
+        # TODO: Use secure=True
+        response = self.client.post(reverse('unblock:create_done'), data)
+        self.assertRedirects(response, reverse('unblock:create'))
+        self.assertEqual(len(Puzzle.objects.filter(name="My Puzzle")), 0)

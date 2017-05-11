@@ -6,13 +6,13 @@
 {% load static %}
 <script type="text/javascript">
     {# Take advantage of common syntax between JavaScript and Python #}
-    var tiles = {{ tiles }};
-    var movesRemaining = {{ puzzle.moves }};
+    var rawTiles = {{ tiles }};
 </script>
 <script
-  type="text/javascript"
-  defer
-  src="{% static 'unblock/play.js' %}">
+  type="text/javascript" defer src="{% static 'unblock/grid.js' %}">
+</script>
+<script
+  type="text/javascript" defer src="{% static 'unblock/play.js' %}">
 </script>
 {% endblock head %}
 

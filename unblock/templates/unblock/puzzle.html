@@ -5,8 +5,9 @@
 {% block head %}
 {% load static %}
 <script type="text/javascript">
-    {# Take advantage of common syntax between JavaScript and Python #}
-    var rawTiles = {{ tiles }};
+    var rawTiles = "{{ puzzle.tiles|escapejs }}";
+    var rows = {{ num_rows }};
+    var columns = {{ num_columns }};
 </script>
 <script
   type="text/javascript" defer src="{% static 'unblock/grid.js' %}">
@@ -30,18 +31,5 @@
     {% endif %}
     <p>Moves: <span id="moves_remaining">{{ puzzle.moves }}</p>
 </div>
-<div class="column">
-    <canvas id="canvas" width=300 height=600></canvas>
-    <noscript>
-        <table>
-        {% for row in tiles %}
-            <tr>
-            {% for tile in row %}
-                <td>{{ tile }}</td>
-            {% endfor %}
-            </tr>
-        {% endfor %}
-        </table>
-    </noscript>
-</div>
+<canvas id="canvas" class="column" width=300 height=600></canvas>
 {% endblock content %}

@@ -13,15 +13,8 @@ def index(request):
 
 def puzzle(request, puzzle_id):
     p = get_object_or_404(Puzzle, pk=puzzle_id)
-    context = {
-        'puzzle': p,
-        'tiles': [
-            [
-                int(p.tiles[num_columns*(num_rows-r-1)+c])
-                for c in range(num_columns)
-            ]
-            for r in range(num_rows)
-        ],
+    context = { 
+        'puzzle': p, 'num_rows': num_rows, 'num_columns': num_columns
     }
     return render(request, 'unblock/puzzle.html', context)
 

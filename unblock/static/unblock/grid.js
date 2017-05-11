@@ -1,7 +1,9 @@
 // Code for displaying a grid of tiles
+// Expects three variables to be predefined:
+// rawTiles: the initial tile grid encoded as a string
+// rows: the number of rows in the tile grid
+// columns: the number of columns in the tile grid
 
-var rows = rawTiles.length;
-var columns = rawTiles[0].length;
 var tileWidth = document.getElementById('canvas').width / columns;
 var tileHeight = document.getElementById('canvas').height / rows;
 var colors =
@@ -12,14 +14,17 @@ function Tile(color) {
 }
 
 function Grid(rawTiles, context) {
+    function rawTileValue(r, c) {
+        return rawTiles.charCodeAt(columns*(rows-r-1)+c);
+    }
     this.tiles = [];
     for (var r = 0; r < rows; r++) {
         this.tiles[r] = [];
         for (var c = 0; c < columns; c++) {
-            if (rawTiles[r][c] == 0) {
+            if (rawTileValue(r, c) == 0) {
                 this.tiles[r][c] = null;
             } else {
-                this.tiles[r][c] = new Tile(rawTiles[r][c]-1);
+                this.tiles[r][c] = new Tile(rawTileValue(r, c) - 1);
             }
         }
     }

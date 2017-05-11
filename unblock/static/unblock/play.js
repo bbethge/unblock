@@ -1,192 +1,213 @@
-var canvas = document.getElementById('canvas');
-var context = canvas.getContext('2d');
 var rows = tiles.length;
 var columns = tiles[0].length;
-var tileWidth = canvas.width / columns;
-var tileHeight = canvas.height / rows;
-var cursorRow = Math.round(rows / 2);
-var cursorColumn = Math.round(columns / 2);
+var tileWidth = document.getElementById('canvas').width / columns;
+var tileHeight = document.getElementById('canvas').height / rows;
 var deadTileLifetime = 300;
 var fallingTileTimeout = 100;
-
-
 var colors =
     [ '#20a020', '#108080', '#303090', '#903090', '#802020', '#a0a030'];
 
 function Tile(color) {
-    return {
-        'color': color,
-        'dead': false,
-    };
+    this.color = color;
 }
 
-var tileObjects = [];
-for (var r = 0; r < rows; r++) {
-    tileObjects[r] = [];
-    for (var c = 0; c < columns; c++) {
-        if (tiles[r][c] == 0) {
-            tileObjects[r][c] = null;
-        } else {
-            tileObjects[r][c] = Tile(tiles[r][c]-1);
+function Grid(rawTiles, context) {
+    this.tiles = [];
+    for (var r = 0; r < rows; r++) {
+        this.tiles[r] = [];
+        for (var c = 0; c < columns; c++) {
+            if (tiles[r][c] == 0) {
+                this.tiles[r][c] = null;
+            } else {
+                this.tiles[r][c] = new Tile(tiles[r][c]-1);
+            }
         }
     }
+    this.context = context;
 }
 
-function drawCanvas() {
-    context.fillStyle = '#bbbbbb';
-    context.fillRect(0, 0, canvas.width, canvas.height);
+Grid.prototype.draw = function () {
+    this.context.fillStyle = '#bbbbbb';
+    this.context.fillRect(
+        0, 0, this.context.canvas.width, this.context.canvas.height
+    );
     for (var r = 0; r < rows; r++) {
         for (var c = 0; c < columns; c++) {
-            if (tileObjects[r][c] !== null) {
-                if (tileObjects[r][c].dead) {
-                    context.fillStyle = 'black';
+            if (this.tiles[r][c] !== null) {
+                if (this.tiles[r][c].dead) {
+                    this.context.fillStyle = 'black';
                 } else {
-                    context.fillStyle = colors[tileObjects[r][c].color];
+                    this.context.fillStyle = colors[this.tiles[r][c].color];
                 }
-                context.fillRect(
+                this.context.fillRect(
                     c * tileWidth, r * tileHeight, tileWidth, tileHeight
                 );
             }
         }
     }
-    context.lineWidth = 2 * Math.round(tileWidth / 25);
-    context.strokeStyle = 'white';
-    context.strokeRect(
-        (cursorColumn-1) * tileWidth, cursorRow * tileHeight,
+}
+
+function PlayingGrid(
+    rawTiles, context, movesIndicator, cursorRow, cursorColumn
+) {
+    Grid.call(this, rawTiles, context);
+    this.cursorRow = cursorRow;
+    this.cursorColumn = cursorColumn;
+    this.movesIndicator = movesIndicator;
+    this.movesRemaining = movesIndicator.firstChild.data;
+}
+PlayingGrid.prototype = Object.create(Grid.prototype);
+PlayingGrid.prototype.constructor = PlayingGrid;
+
+PlayingGrid.prototype.draw = function () {
+    Grid.prototype.draw.call(this);
+    this.context.lineWidth = 2 * Math.round(tileWidth / 25);
+    this.context.strokeStyle = 'white';
+    this.context.strokeRect(
+        (this.cursorColumn-1) * tileWidth, this.cursorRow * tileHeight,
         tileWidth, tileHeight
     );
-    context.strokeRect(
-        cursorColumn * tileWidth, cursorRow * tileHeight,
+    this.context.strokeRect(
+        this.cursorColumn * tileWidth, this.cursorRow * tileHeight,
         tileWidth, tileHeight
     );
 }
 
-function markDyingTiles() {
+PlayingGrid.prototype.markDyingTiles = function () {
     for (var r = 0; r < rows; r++) {
         for (var c = 0; c < columns - 2; c++) {
             if (
-                tileObjects[r][c] !== null
-                && tileObjects[r][c+1] !== null
-                && tileObjects[r][c+1].color == tileObjects[r][c].color
-                && tileObjects[r][c+2] !== null
-                && tileObjects[r][c+2].color == tileObjects[r][c].color
+                this.tiles[r][c] !== null
+                && this.tiles[r][c+1] !== null
+                && this.tiles[r][c+1].color == this.tiles[r][c].color
+                && this.tiles[r][c+2] !== null
+                && this.tiles[r][c+2].color == this.tiles[r][c].color
             ) {
-                tileObjects[r][c].dying = true;
-                tileObjects[r][c+1].dying = true;
-                tileObjects[r][c+2].dying = true;
+                this.tiles[r][c].dying = true;
+                this.tiles[r][c+1].dying = true;
+                this.tiles[r][c+2].dying = true;
             }
         }
     }
     for (var r = 0; r < rows - 2; r++) {
         for (var c = 0; c < columns; c++) {
             if (
-                tileObjects[r][c] !== null
-                && tileObjects[r+1][c] !== null
-                && tileObjects[r+1][c].color == tileObjects[r][c].color
-                && tileObjects[r+2][c] !== null
-                && tileObjects[r+2][c].color == tileObjects[r][c].color
+                this.tiles[r][c] !== null
+                && this.tiles[r+1][c] !== null
+                && this.tiles[r+1][c].color == this.tiles[r][c].color
+                && this.tiles[r+2][c] !== null
+                && this.tiles[r+2][c].color == this.tiles[r][c].color
             ) {
-                tileObjects[r][c].dying = true;
-                tileObjects[r+1][c].dying = true;
-                tileObjects[r+2][c].dying = true;
+                this.tiles[r][c].dying = true;
+                this.tiles[r+1][c].dying = true;
+                this.tiles[r+2][c].dying = true;
             }
         }
     }
     var deadTiles = false;
     for (var r = 0; r < rows; r++) {
         for (var c = 0; c < columns; c++) {
-            if (tileObjects[r][c] !== null && tileObjects[r][c].dying) {
-                tileObjects[r][c].dead = true;
+            if (this.tiles[r][c] !== null && this.tiles[r][c].dying) {
+                this.tiles[r][c].dead = true;
                 deadTiles = true;
-                setTimeout((function (r, c) {
-                    tileObjects[r][c] = null;
-                }), deadTileLifetime, r, c);
-                delete tileObjects[r][c].dying;
+                setTimeout((function (tiles, r, c) {
+                    tiles[r][c] = null;
+                }), deadTileLifetime, this.tiles, r, c);
+                delete this.tiles[r][c].dying;
             }
         }
     }
     if (deadTiles) {
-        setTimeout((function() {
-            moveFallingTiles();
-            drawCanvas();
-        }), deadTileLifetime);
+        setTimeout((function(grid) {
+            grid.moveFallingTiles();
+            grid.draw();
+        }), deadTileLifetime, this);
     }
 }
 
-function moveFallingTiles() {
+PlayingGrid.prototype.moveFallingTiles = function() {
     var fallingTiles = false;
     for (var r = rows - 2; r >= 0; r--) {
         for (var c = 0; c < columns; c++) {
             if (
-                tileObjects[r][c] !== null && !tileObjects[r][c].dead
+                this.tiles[r][c] !== null && !this.tiles[r][c].dead
                 && (
-                    tileObjects[r+1][c] === null
-                    || tileObjects[r+1][c].falling
+                    this.tiles[r+1][c] === null
+                    || this.tiles[r+1][c].falling
                 )
             ) {
                 fallingTiles = true;
-                // FIXME: what if the player changes tileObjects[r][c]
+                // FIXME: what if the player changes this.tiles[r][c]
                 // before the timeout?
-                tileObjects[r][c].falling = true;
-                setTimeout((function (r, c) {
-                    if (tileObjects[r+1][c] === null) {
-                        tileObjects[r+1][c] = tileObjects[r][c];
-                        delete tileObjects[r+1][c].falling;
-                        tileObjects[r][c] = null;
+                this.tiles[r][c].falling = true;
+                setTimeout((function (grid, r, c) {
+                    if (grid.tiles[r+1][c] === null) {
+                        grid.tiles[r+1][c] = grid.tiles[r][c];
+                        delete grid.tiles[r+1][c].falling;
+                        grid.tiles[r][c] = null;
                     }
-                }), fallingTileTimeout, r, c);
+                }), fallingTileTimeout, this, r, c);
             }
         }
     }
     if (fallingTiles) {
-        setTimeout((function () {
-            moveFallingTiles();
-            drawCanvas();
-        }), fallingTileTimeout);
+        setTimeout((function (grid) {
+            grid.moveFallingTiles();
+            grid.draw();
+        }), fallingTileTimeout, this);
     } else {
-        markDyingTiles();
+        this.markDyingTiles();
     }
 }
 
-canvas.onmousemove = function (event) {
-    // TODO: check whether layerX/layerY are standard
-    var x = event.layerX - canvas.offsetLeft;
-    var y = event.layerY - canvas.offsetTop;
-    cursorRow = Math.min(Math.floor(y / tileHeight), rows - 1);
-    cursorColumn = Math.min(
-        Math.max(1, Math.round(x / tileWidth)), columns - 1
-    );
-    drawCanvas();
-}
+PlayingGrid.prototype.startGame = function() {
+    this.draw();
 
-canvas.onclick = function (event) {
-    var leftMoveable =
-        tileObjects[cursorRow][cursorColumn-1] === null
-        || !tileObjects[cursorRow][cursorColumn-1].dead;
-    var rightMoveable =
-        tileObjects[cursorRow][cursorColumn] === null
-        || !tileObjects[cursorRow][cursorColumn].dead;
-    var bothNull =
-        tileObjects[cursorRow][cursorColumn-1] == null
-        && tileObjects[cursorRow][cursorColumn] == null;
-    if (
-        event.button == 0 && leftMoveable && rightMoveable && !bothNull
-        && movesRemaining > 0
-    ) {
-        var swap = tileObjects[cursorRow][cursorColumn];
-        tileObjects[cursorRow][cursorColumn] =
-            tileObjects[cursorRow][cursorColumn-1];
-        tileObjects[cursorRow][cursorColumn-1] = swap;
-        movesRemaining--;
-        var movesIndicator = document.getElementById("moves_remaining");
-        movesIndicator.replaceChild(
-            document.createTextNode(movesRemaining),
-            movesIndicator.firstChild
+    var grid = this;
+    this.context.canvas.onmousemove = function (event) {
+        // TODO: check whether layerX/layerY are standard
+        var x = event.layerX - canvas.offsetLeft;
+        var y = event.layerY - canvas.offsetTop;
+        grid.cursorRow = Math.min(Math.floor(y / tileHeight), rows - 1);
+        grid.cursorColumn = Math.min(
+            Math.max(1, Math.round(x / tileWidth)), columns - 1
         );
-        moveFallingTiles();
-        markDyingTiles();
-        drawCanvas();
+        grid.draw();
+    }
+
+    this.context.canvas.onclick = function (event) {
+        var leftMoveable =
+            grid.tiles[grid.cursorRow][grid.cursorColumn-1] === null
+            || !grid.tiles[grid.cursorRow][grid.cursorColumn-1].dead;
+        var rightMoveable =
+            grid.tiles[grid.cursorRow][grid.cursorColumn] === null
+            || !grid.tiles[grid.cursorRow][grid.cursorColumn].dead;
+        var bothNull =
+            grid.tiles[grid.cursorRow][grid.cursorColumn-1] == null
+            && grid.tiles[grid.cursorRow][grid.cursorColumn] == null;
+        if (
+            event.button == 0 && leftMoveable && rightMoveable && !bothNull
+            && grid.movesRemaining > 0
+        ) {
+            var swap = grid.tiles[grid.cursorRow][grid.cursorColumn];
+            grid.tiles[grid.cursorRow][grid.cursorColumn] =
+                grid.tiles[grid.cursorRow][grid.cursorColumn-1];
+            grid.tiles[grid.cursorRow][grid.cursorColumn-1] = swap;
+            grid.movesRemaining--;
+            grid.movesIndicator.replaceChild(
+                document.createTextNode(grid.movesRemaining),
+                grid.movesIndicator.firstChild
+            );
+            grid.moveFallingTiles();
+            grid.markDyingTiles();
+            grid.draw();
+        }
     }
 }
 
-drawCanvas();
+playingGrid = new PlayingGrid(
+    tiles, document.getElementById('canvas').getContext('2d'),
+    document.getElementById('moves_remaining'),
+    Math.round(rows/2), Math.round(columns/2)
+);
+playingGrid.startGame();

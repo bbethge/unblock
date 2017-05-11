@@ -14,24 +14,34 @@
 <script
   type="text/javascript" defer src="{% static 'unblock/play.js' %}">
 </script>
+<style type="text/css">
+    .column {
+        display: inline-block;
+        vertical-align: top;
+    }
+</style>
 {% endblock head %}
 
 {% block content %}
-<h1>{{ puzzle.name }}</h1>
-{% if puzzle.creator %}
-<p>Created by {{ puzzle.creator.username }}</p>
-{% endif %}
-<p>Moves: <span id="moves_remaining">{{ puzzle.moves }}</p>
-<canvas id="canvas" width=300 height=600></canvas>
-<noscript>
-    <table>
-    {% for row in tiles %}
-        <tr>
-        {% for tile in row %}
-            <td>{{ tile }}</td>
+<div class="column">
+    <h1>{{ puzzle.name }}</h1>
+    {% if puzzle.creator %}
+    <p>Created by {{ puzzle.creator.username }}</p>
+    {% endif %}
+    <p>Moves: <span id="moves_remaining">{{ puzzle.moves }}</p>
+</div>
+<div class="column">
+    <canvas id="canvas" width=300 height=600></canvas>
+    <noscript>
+        <table>
+        {% for row in tiles %}
+            <tr>
+            {% for tile in row %}
+                <td>{{ tile }}</td>
+            {% endfor %}
+            </tr>
         {% endfor %}
-        </tr>
-    {% endfor %}
-    </table>
-</noscript>
+        </table>
+    </noscript>
+</div>
 {% endblock content %}

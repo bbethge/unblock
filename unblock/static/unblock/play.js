@@ -1,4 +1,7 @@
 // Extends grid.js to provide code for playing a puzzle
+// Additionally expects the following to be predefined:
+// rawTiles: the initial tile grid encoded as a string, with zeros replaced by
+//     emptyChar
 
 var deadTileLifetime = 300;
 var fallingTileTimeout = 100;

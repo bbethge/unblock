@@ -1,8 +1,6 @@
 // Code for displaying a grid of tiles
 // Expects three variables to be predefined:
 // emptyChar: character to represent an empty cell
-// rawTiles: the initial tile grid encoded as a string, with zeros replaced by
-//     emptyChar
 // rows: the number of rows in the tile grid
 // columns: the number of columns in the tile grid
 

@@ -5,9 +5,10 @@ from django.contrib.auth.models import User
 
 num_rows = 12
 num_columns = 6
-num_colors = 6  # Maximum 255; must have enough colors defined in play.js
+num_colors = 6  # Maximum 126; must have enough colors defined in play.js
 max_stars = 5
 max_brains = 5
+max_puzzle_name_length = 200
 
 
 class InvalidRatingError(Exception):
@@ -15,7 +16,7 @@ class InvalidRatingError(Exception):
 
 
 class Puzzle(models.Model):
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=max_puzzle_name_length)
     pub_date = models.DateTimeField('date published', auto_now_add=True)
     creator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     stars = models.IntegerField(default=0)

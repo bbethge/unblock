@@ -1,11 +1,14 @@
 // Code for displaying a grid of tiles
 // Expects three variables to be predefined:
-// rawTiles: the initial tile grid encoded as a string
+// emptyChar: character to represent an empty cell
+// rawTiles: the initial tile grid encoded as a string, with zeros replaced by
+//     emptyChar
 // rows: the number of rows in the tile grid
 // columns: the number of columns in the tile grid
 
 var tileWidth = document.getElementById('canvas').width / columns;
 var tileHeight = document.getElementById('canvas').height / rows;
+var backgroundColor = '#bbbbbb';
 var colors =
     [ '#20a020', '#108080', '#303090', '#903090', '#802020', '#a0a030'];
 
@@ -15,7 +18,8 @@ function Tile(color) {
 
 function Grid(rawTiles, context) {
     function rawTileValue(r, c) {
-        return rawTiles.charCodeAt(columns*(rows-r-1)+c);
+        num = rawTiles.charCodeAt(columns*(rows-r-1)+c);
+        return num != emptyChar.charCodeAt(0) ? num : 0
     }
     this.tiles = [];
     for (var r = 0; r < rows; r++) {
@@ -32,7 +36,7 @@ function Grid(rawTiles, context) {
 }
 
 Grid.prototype.draw = function () {
-    this.context.fillStyle = '#bbbbbb';
+    this.context.fillStyle = backgroundColor;
     this.context.fillRect(
         0, 0, this.context.canvas.width, this.context.canvas.height
     );
@@ -50,4 +54,20 @@ Grid.prototype.draw = function () {
             }
         }
     }
+}
+
+Grid.prototype.getRawTiles = function () {
+    result = "";
+    for (var r = rows - 1; r >= 0; r--) {
+        for (var c = 0; c < columns; c++) {
+            if (this.tiles[r][c] !== null) {
+                result = result.concat(
+                    String.fromCharCode(this.tiles[r][c].color+1)
+                );
+            } else {
+                result = result.concat(emptyChar);
+            }
+        }
+    }
+    return result;
 }

@@ -1,13 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ puzzle.name }} – {{ block.super }}{% endblock %}
 
 {% block head %}
-{% load static %}
 <script type="text/javascript">
     var rawTiles = "{{ puzzle.tiles|escapejs }}";
     var rows = {{ num_rows }};
     var columns = {{ num_columns }};
+    var emptyChar = '{{ empty_char }}';
 </script>
 <script
   type="text/javascript" defer src="{% static 'unblock/grid.js' %}">
@@ -31,5 +32,8 @@
     {% endif %}
     <p>Moves: <span id="moves_remaining">{{ puzzle.moves }}</p>
 </div>
-<canvas id="canvas" class="column" width=300 height=600></canvas>
+<canvas
+  id="canvas" class="column"
+  width={{ canvas_width }} height={{ canvas_height }}>
+</canvas>
 {% endblock content %}
